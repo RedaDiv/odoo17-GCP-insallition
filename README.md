@@ -172,7 +172,7 @@ To ensure that Odoo is accessible from the web, check the **firewall rules** in 
 
 That's it! Now, Odoo 17 is installed using a non-root user (`odoo17`), ensuring better security and management.
 
-#############################################################################################################################
+---
 
 
 To add **PostGIS** (a spatial extension for PostgreSQL) to your PostgreSQL installation, you can follow these steps. We'll assume you're still using the **non-root user `odoo17`** and are connected to your VM where PostgreSQL is installed.
@@ -242,3 +242,131 @@ To integrate **PostGIS** with Odoo, you can:
 ---
 
 You now have **PostGIS** installed and enabled on your PostgreSQL database, ready for use in spatial queries and GIS functionalities.
+
+---
+
+To install **Redis** on **Google Cloud Platform (GCP)** and configure it to work with **Odoo 17**, you can follow these steps. We will assume you're using a **non-root user (`odoo17`)** and have an active virtual machine (VM) instance on GCP where Odoo 17 is installed.
+
+### Step 1: Connect to Your Google Cloud VM
+1. Go to the **Google Cloud Console**.
+2. Navigate to **Compute Engine** > **VM instances**.
+3. Click **SSH** next to your VM to open a terminal session.
+
+### Step 2: Install Redis on the VM
+1. **Update the package list**:
+   ```bash
+   sudo apt update
+   ```
+
+2. **Install Redis**:
+   ```bash
+   sudo apt install redis-server -y
+   ```
+
+3. **Verify that Redis is installed**:
+   After the installation is complete, verify it by checking the version:
+   ```bash
+   redis-server --version
+   ```
+
+### Step 3: Configure Redis for Odoo
+1. **Edit the Redis configuration file** to improve performance and security for Odoo. Open the Redis configuration file:
+   ```bash
+   sudo nano /etc/redis/redis.conf
+   ```
+
+2. In the configuration file, make the following changes:
+
+   - **Set a password** for Redis for better security:
+     Find the line:
+     ```ini
+     # requirepass foobared
+     ```
+     Uncomment the line and set a strong password:
+     ```ini
+     requirepass your_redis_password
+     ```
+
+   - **Set `maxmemory`** to limit the maximum amount of memory Redis can use. For example, to allow Redis to use up to 1 GB of memory, find and set:
+     ```ini
+     maxmemory 1gb
+     ```
+
+   - **Set the eviction policy** to determine what Redis should do when the `maxmemory` limit is reached. To evict the least recently used keys, set the following:
+     ```ini
+     maxmemory-policy allkeys-lru
+     ```
+
+3. Save and exit the file: Press `CTRL+X`, then `Y`, and press `Enter`.
+
+4. **Restart Redis** for the changes to take effect:
+   ```bash
+   sudo systemctl restart redis-server
+   ```
+
+5. **Enable Redis to start on boot**:
+   ```bash
+   sudo systemctl enable redis-server
+   ```
+
+### Step 4: Configure Odoo to Use Redis
+1. Switch to the `odoo17` user (if not already):
+   ```bash
+   su - odoo17
+   ```
+
+2. **Open the Odoo configuration file** to enable Redis caching:
+   ```bash
+   sudo nano /etc/odoo.conf
+   ```
+
+3. Add the following lines to configure Redis for session storage and caching:
+
+   ```ini
+   [options]
+   # Redis settings
+   proxy_mode = True
+   dbfilter = odoo17
+
+   # Session and Cache Settings
+   longpolling_port = 8072
+   # Redis session storage
+   redis_host = 127.0.0.1
+   redis_port = 6379
+   redis_password = your_redis_password
+   ```
+
+4. Save and exit the file.
+
+### Step 5: Restart Odoo to Apply Changes
+1. **Restart the Odoo service** so that the changes take effect:
+   ```bash
+   sudo systemctl restart odoo17.service
+   ```
+
+### Step 6: Verify Redis is Working with Odoo
+You can verify if Odoo is using Redis by checking the Redis stats using the following command:
+
+```bash
+redis-cli -a your_redis_password info stats
+```
+
+You should see activity on Redis, indicating it's being used for caching and session management by Odoo.
+
+### Step 7: Open Redis Port (Optional)
+By default, Redis listens on **localhost** (127.0.0.1), which is fine for most setups. If you want to allow external access (e.g., from another server), you would need to adjust the Redis configuration to bind to an external IP and open the port in your GCP firewall.
+
+To allow external access to Redis:
+1. Edit `/etc/redis/redis.conf` and change the `bind` address:
+   ```ini
+   bind 0.0.0.0
+   ```
+2. Add a firewall rule on GCP to open port `6379` (Redis default port):
+   - Go to **VPC Network** > **Firewall rules**.
+   - Create a new firewall rule to allow traffic on port `6379`.
+
+However, opening Redis to the internet is generally **not recommended** due to security risks. Use internal connections or VPNs if possible.
+
+---
+
+That's it! Redis is now installed and configured to work with your **Odoo 17** instance on Google Cloud.
