@@ -171,3 +171,74 @@ To ensure that Odoo is accessible from the web, check the **firewall rules** in 
 ---
 
 That's it! Now, Odoo 17 is installed using a non-root user (`odoo17`), ensuring better security and management.
+
+#############################################################################################################################
+
+
+To add **PostGIS** (a spatial extension for PostgreSQL) to your PostgreSQL installation, you can follow these steps. We'll assume you're still using the **non-root user `odoo17`** and are connected to your VM where PostgreSQL is installed.
+
+### Step 1: Install PostGIS
+First, you need to install the PostGIS extension for PostgreSQL:
+
+1. **Update package lists and install PostGIS**:
+   ```bash
+   sudo apt update
+   sudo apt install postgis postgresql-14-postgis-3 -y
+   ```
+
+2. **Verify the installation**:
+   After installation, you can check if the `postgis` package is available by running:
+   ```bash
+   psql --version
+   ```
+
+### Step 2: Enable PostGIS on a PostgreSQL Database
+Now that PostGIS is installed, you need to enable the extension on your PostgreSQL database.
+
+1. **Switch to the PostgreSQL user**:
+   ```bash
+   sudo -i -u postgres
+   ```
+
+2. **Access the PostgreSQL shell**:
+   ```bash
+   psql
+   ```
+
+3. **Connect to your Odoo database**:
+   - Replace `odoo_database` with the name of your Odoo database.
+   ```bash
+   \c odoo_database
+   ```
+
+4. **Enable the PostGIS extension**:
+   ```bash
+   CREATE EXTENSION postgis;
+   CREATE EXTENSION postgis_topology;
+   ```
+
+5. **Verify PostGIS installation**:
+   You can verify that PostGIS is installed correctly by running:
+   ```bash
+   SELECT PostGIS_Version();
+   ```
+
+6. **Exit PostgreSQL**:
+   ```bash
+   \q
+   ```
+
+7. **Return to the odoo17 user**:
+   ```bash
+   exit
+   ```
+
+### Step 3: Using PostGIS with Odoo
+To integrate **PostGIS** with Odoo, you can:
+
+- Develop custom Odoo modules that use spatial data stored in PostGIS.
+- Use PostGIS functions for spatial queries, for example, integrating geographical information into project management.
+
+---
+
+You now have **PostGIS** installed and enabled on your PostgreSQL database, ready for use in spatial queries and GIS functionalities.
