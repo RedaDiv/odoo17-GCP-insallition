@@ -1,6 +1,6 @@
 # odoo17-GCP-insallition
 
-Certainly! Here's the updated step-by-step guide for installing **Odoo 17** on **Google Cloud**, using a non-root user (`odoo17`) to handle the installation:
+step-by-step guide for installing **Odoo 17** on **Google Cloud**, using a non-root user (`odoo17`) to handle the installation:
 
 ### Step 1: Set up a Google Cloud Account
 1. Go to [Google Cloud Console](https://console.cloud.google.com).
@@ -170,4 +170,4 @@ To ensure that Odoo is accessible from the web, check the **firewall rules** in 
 
 ---
 
-That's it! Now, Odoo 17 is installed using a non-root user (`odoo17`), ensuring better security and management. Let me know if you need further assistance!
+That's it! Now, Odoo 17 is installed using a non-root user (`odoo17`), ensuring better security and management.
